@@ -1,5 +1,11 @@
 # Image Dataset
 
+## 安装方法
+
+```console
+$ python setup.py install
+```
+
 ## 使用说明
 
 ### 1. 写入图片
