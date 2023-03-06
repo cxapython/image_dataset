@@ -1,3 +1,5 @@
+import sys
+sys.path.append(".")
 import image_dataset
 import requests
 from PIL import Image

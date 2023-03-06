@@ -5,7 +5,7 @@ import zstandard as zstd
 
 class ImageData:
     def __init__(self, image : bytes, meta : bytes):
-        self._img = Image.open(io.BytesIO(image), formats=["webp"])
+        self._img = Image.open(io.BytesIO(image), formats=["jpeg"])
         self._meta = json.loads(zstd.decompress(meta).decode("utf-8"))
     
     @property
@@ -23,4 +23,3 @@ class ImageData:
     @property
     def metadata(self):
         return self._meta
-
