@@ -12,10 +12,10 @@ class DatasetBlockIterator:
         self._block = block
         self._fp = open(block.path, "rb")
         self._fp.seek(block._index_offset, os.SEEK_SET)
+        self.end_fp = os.path.getsize(self._block.path) - (4 + self._block.len_index)
     
     def __next__(self) -> ImageData:
-        end_fp = os.path.getsize(self._block.path) - (4 + self._block.len_index)
-        if self._fp.tell() == end_fp:
+        if self._fp.tell() == self.end_fp:
             raise StopIteration()
         tmp = self._fp.read(8)
         if len(tmp) == 0:
@@ -63,10 +63,7 @@ class DatasetBlock:
 
     def __iter__(self) -> DatasetBlockIterator:
         return DatasetBlockIterator(self)
-    
-    def _close_block(self):
-        '''关闭块，解除占用'''
-        self._fp.close()
+
 
 class ImageDataset:
     def __init__(self, path : str, chunk_size : int = 65536):
@@ -104,8 +101,3 @@ class ImageDataset:
         for i in range(self._num_files):
             for img in self._get_block(i):
                 yield img
-    
-    def close_image_dataset(self):
-        '''关闭文件指针'''
-        for k in range(self._num_files):
-            self._get_block(k)._close_block()

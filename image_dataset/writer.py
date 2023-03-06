@@ -1,4 +1,3 @@
-import chunk
 import contextlib
 import io
 import numpy as np
@@ -58,7 +57,7 @@ class ImageDatasetBuilder:
 
         if self._inblock_index == self._chunk_size:
             self._close_block()
-            self._init_next_block
+            self._init_next_block()
 
 
 @contextlib.contextmanager

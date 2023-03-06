@@ -1,5 +1,3 @@
-import sys
-sys.path.append(".")
 import image_dataset
 import json
 
