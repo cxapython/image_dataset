@@ -10,10 +10,13 @@ from functools import lru_cache
 class DatasetBlockIterator:
     def __init__(self, block : "DatasetBlock") -> None:
         self._block = block
-        self._fp = open(block._path, "rb")
+        self._fp = open(block.path, "rb")
         self._fp.seek(block._index_offset, os.SEEK_SET)
+        self.end_fp = os.path.getsize(self._block.path) - (4 + self._block.len_index)
     
     def __next__(self) -> ImageData:
+        if self._fp.tell() == self.end_fp:
+            raise StopIteration()
         tmp = self._fp.read(8)
         if len(tmp) == 0:
             raise StopIteration()
@@ -29,14 +32,18 @@ class DatasetBlockIterator:
             raise IOError("Unexpected end of file")
         return ImageData(data, meta)
 
+
+
 class DatasetBlock:
     def __init__(self, path : str):
         fp = open(path, "rb")
-        len_index = struct.unpack("<I", fp.read(4))[0]
-        self._index = np.frombuffer(zstd.decompress(fp.read(len_index)), dtype=np.int64)
-        self._index_offset = 4 + len_index
+        fp.seek(-4, 2)  #文件倒数第4个字节
+        self.len_index = struct.unpack("<I", fp.read(4))[0]
+        fp.seek(-(4+self.len_index), 2)  #索引开始的位置
+        self._index = np.frombuffer(zstd.decompress(fp.read(self.len_index)), dtype=np.int64)
+        self._index_offset = 0
         self._fp = fp
-        self._path = path
+        self.path = path
         self._len = (self._index >= 0).sum()
 
     def __len__(self) -> int:
@@ -94,4 +101,3 @@ class ImageDataset:
         for i in range(self._num_files):
             for img in self._get_block(i):
                 yield img
-
