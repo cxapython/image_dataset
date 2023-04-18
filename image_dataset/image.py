@@ -11,8 +11,13 @@ class ImageData:
         kind = filetype.guess(image)
         self._img_type = kind.extension
         self._file_name = file_name
+        self._img_buffer = image
         self._img = Image.open(io.BytesIO(image))
         self._meta = json.loads(zstd.decompress(meta).decode("utf-8"))
+
+    @property
+    def img_buffer(self):
+        return self._img_buffer
 
     @property
     def img_type(self):
